@@ -1,3 +1,3 @@
-export const baseURL = "http://localhost:3000";
-export const secretKey = "storyBox@192167";
-export const projectName = "StoryBox";
+export const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+export const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY;
+export const projectName = process.env.NEXT_PUBLIC_PROJECT_NAME;
