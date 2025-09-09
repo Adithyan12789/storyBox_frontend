@@ -1,0 +1,15 @@
+<svg width="25" height="25" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="25" height="25" fill="#D4D4D4"/>
+<g id="Frame 1" clipPath="url(#clip0_0_1)">
+<rect width="1920" height="1080" transform="translate(-27 -556)" fill="white"/>
+<rect id="Rectangle 311" x="-27" y="-556" width="1920" height="1080" fill="#181818"/>
+<g id="flash-circle-1-svgrepo-com 1">
+<path id="Vector" d="M18.9999 1.8999C9.5607 1.8999 1.8999 9.5607 1.8999 18.9999C1.8999 28.4391 9.5607 36.0999 18.9999 36.0999C28.4391 36.0999 36.0999 28.4391 36.0999 18.9999C36.0999 9.5607 28.4562 1.8999 18.9999 1.8999ZM25.4124 19.5984L19.0512 26.8317L18.2988 27.6867C17.2557 28.8666 16.4007 28.5588 16.4007 26.9685V20.1969H13.4937C12.177 20.1969 11.8179 19.3932 12.69 18.4014L19.0512 11.1681L19.8036 10.3131C20.8467 9.1332 21.7017 9.441 21.7017 11.0313V17.8029H24.6087C25.9254 17.8029 26.2845 18.6066 25.4124 19.5984Z" fill="#646464"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_1">
+<rect width="1920" height="1080" fill="white" transform="translate(-27 -556)"/>
+</clipPath>
+</defs>
+</svg>

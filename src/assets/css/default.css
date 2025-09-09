@@ -1,0 +1,319 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;800;900&display=swap");
+/* font-family: 'Roboto', sans-serif; */
+
+:root {
+  --black--: #000;
+  --white--: #fff;
+  --prime--: #524ae3;
+  --blackPrime--: #0f172a;
+  --grayPrime--: #cfcfcf;
+  --inputBorder--: #cbd5e1;
+  --btnPrime--: #524ae3;
+  --pink--: #cb198e;
+  --lightOrangeColor: #8A82FB;
+}
+
+/* Start Default CSS */
+body {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--black--);
+  font-family: "Poppins",Roboto, Helvetica, Arial, sans-serif !important;
+  background: #fafafa !important;
+}
+button {
+  cursor: pointer !important;
+}
+
+/* For Webkit based browsers (Chrome, Safari) */
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+
+ul {
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+/* End Default CSS */
+
+/* Start Theme Text Color */
+.primeColor {
+  color: var(--prime--) !important;
+}
+.textPink {
+  color: var(--pink--) !important;
+}
+.bgDark {
+  background-color: #0a1e29 !important;
+}
+.bgPink {
+  background-color: var(--pink--) !important;
+}
+
+.primeBlackColor {
+  color: var(--blackPrime--) !important;
+}
+
+/* End Theme Text Color */
+
+/* Default Custom Dynamic CSS */
+
+.themeFont {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blackPrime--);
+}
+
+.boxCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boxBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.text-error {
+  font-size: 14px;
+  color: red;
+}
+.text-red {
+  font-size: 14px;
+  color: red;
+}
+.bg-secondary {
+  opacity: 0.6 !important;
+}
+.textPinktheme {
+  color: #e424a7 !important;
+}
+.image {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: block;
+  height: auto;
+  opacity: 1;
+  width: 38%;
+}
+
+.image,
+.middle {
+  transition: 0.5s ease;
+}
+
+.middle {
+  left: 50%;
+  opacity: 0;
+  position: absolute;
+  text-align: center;
+  top: 28% !important;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}
+
+.container:hover .image {
+  cursor: grab;
+  opacity: 0.6;
+}
+
+.container:hover .middle {
+  opacity: 1;
+}
+.w-85 {
+  width: 85%;
+}
+
+.deg90 {
+  color: #9d9d9d;
+  cursor: pointer;
+  rotate: 90deg;
+}
+
+.row {
+  margin-left: -0.75rem;
+  margin-right: -0.75rem;
+}
+.onLine {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: green;
+  bottom: -4px;
+  right: 3px;
+  border: 3px solid #ffff;
+  position: absolute;
+  display: block;
+}
+.offLine {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: red;
+  bottom: -4px;
+  right: 3px;
+  border: 3px solid #ffff;
+  /* position: absolute; */
+  display: block;
+}
+
+/* .mainHostInfo {
+  position: sticky;
+  top: 62px;
+  width: 100%;
+  z-index: 111;
+  background-color: #fff;
+
+}
+
+/* // extra add inti dashboard // */
+.icon-lg {
+  height: 64px;
+  width: 64px;
+}
+
+.icon-lg i {
+  font-size: 1.8rem;
+  top: 31%;
+}
+.icon-shape {
+  background-position: 50%;
+  border-radius: 0.5rem;
+  height: 70px;
+  width: 70px;
+  display: flex;
+  align-items: center;
+}
+.icon-shape-small {
+  background-position: 50%;
+  border-radius: 0.5rem;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+}
+.icon-shape-small i {
+  margin-left: 12px;
+}
+
+.icon-shape i {
+  color: #fff;
+  opacity: 0.8;
+  position: relative;
+  top: 0px;
+}
+.shadow-dark {
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.14),
+    0 7px 10px -5px rgba(64, 64, 64, 0.4) !important;
+}
+
+.bg-gradient-primary {
+  background-image: linear-gradient(195deg, #ec407a, #d81b60);
+}
+
+.bg-gradient-secondary {
+  background-image: linear-gradient(195deg, #747b8a, #495361);
+}
+
+.bg-gradient-success {
+  background-image: linear-gradient(195deg, #66bb6a, #43a047);
+}
+
+.bg-gradient-info {
+  background-image: linear-gradient(195deg, #49a3f1, #1a73e8);
+}
+
+.bg-gradient-warning {
+  background-image: linear-gradient(195deg, #ffa726, #fb8c00);
+}
+
+.bg-gradient-danger {
+  background-image: linear-gradient(195deg, #ef5350, #e53935);
+}
+
+.bg-gradient-light {
+  background-image: linear-gradient(195deg, #ebeff4, #ced4da);
+}
+
+.bg-gradient-dark {
+  background-image: linear-gradient(195deg, #42424a, #191919);
+}
+
+.bg-gradient-orang {
+  background-image: linear-gradient(195deg, #ef5350, #e53935);
+}
+
+.bg-gradient-pink {
+  background-image: linear-gradient(195deg, #ffa726, #fb8c00);
+}
+
+.bg-gradient-faded-primary {
+  background-image: radial-gradient(
+    370px circle at 80% 50%,
+    rgba(233, 30, 99, 0.6) 0,
+    #c1134e 100%
+  );
+}
+/* // extra add inti dashboard // */
+
+.loader-new {
+  width: 50px;
+  height: 50px;
+}
+
+.loader-new .loading {
+  width: 60px;
+  height: 60px;
+  position: relative;
+}
+
+.loader-new .d1,
+.d2 {
+  border: 5px solid #e83a57;
+  border-radius: 50px;
+}
+
+.loader-new .loading .d1 {
+  width: 55px;
+  height: 55px;
+  position: absolute;
+  border-left-color: transparent;
+  animation: load161 1s linear infinite;
+}
+
+.loader-new .loading .d2 {
+  width: 40px;
+  height: 40px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  margin: 7.5px;
+  animation: load2812 1.5s linear infinite;
+}
+
+@keyframes load161 {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes load2812 {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(-360deg);
+  }
+}
