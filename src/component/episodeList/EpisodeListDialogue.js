@@ -81,16 +81,6 @@ const EpisodeListDialogue = ({ page, size }) => {
       return;
     }
 
-    const getFullImagePath = (path) => {
-      if (!path) return null;
-
-      // If it's already a full URL, return as is
-      if (path.startsWith("http")) return path;
-
-      // Otherwise, prepend backend base URL
-      return `${process.env.NEXT_PUBLIC_BASE_URL}${path}`;
-    };
-
     const videoURL = URL.createObjectURL(file);
     setVideoPreviewUrl(videoURL);
     setSelectedVideo(file);
@@ -110,6 +100,16 @@ const EpisodeListDialogue = ({ page, size }) => {
     });
 
     setErrors({ ...errors, video: "" });
+  };
+
+  const getFullImagePath = (path) => {
+    if (!path) return null;
+
+    // If it's already a full URL, return as is
+    if (path.startsWith("http")) return path;
+
+    // Otherwise, prepend backend base URL
+    return `${process.env.NEXT_PUBLIC_BASE_URL}${path}`;
   };
 
   const generateThumbnailBlob = async (file) => {
