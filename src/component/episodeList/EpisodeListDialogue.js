@@ -236,49 +236,46 @@ const EpisodeListDialogue = ({ page, size }) => {
   const processVideoData = async () => {
     try {
       let uploadedData = null;
-      let finalVideoUrl = videoPath;
-      let finalImage = imagePath;
+      let finalVideoUrl = videoPath || "";
+      let finalImage = imagePath || "";
 
       if (selectedVideo) {
         uploadedData = await uploadVideo();
         if (!uploadedData?.status) throw new Error("Failed to upload video");
         finalVideoUrl = uploadedData.data.videoUrl;
-        // Use custom thumbnail if provided, else use generated one
-        if (!(imagePath instanceof File))
+        if (!imagePath || !(imagePath instanceof File)) {
           finalImage = uploadedData.data.videoImage;
+        }
       } else if (videoPath) {
-        // Generate thumbnail only if user did not provide one
-        if (!(imagePath instanceof File)) {
-          try {
-            const thumbnailBlob = await generateThumbnailFromUrl(videoPath);
-            if (thumbnailBlob) {
-              const thumbFile = new File(
-                [thumbnailBlob],
-                `thumb_${Date.now()}.jpeg`,
-                { type: "image/jpeg" }
-              );
-              const formData = new FormData();
-              formData.append(
-                "folderStructure",
-                `${projectName}/admin/episodeImage`
-              );
-              formData.append("keyName", thumbFile.name);
-              formData.append("content", thumbFile);
+        // Ensure thumbnail exists
+        if (!imagePath || !(imagePath instanceof File)) {
+          const thumbnailBlob = await generateThumbnailFromUrl(videoPath);
+          if (thumbnailBlob) {
+            const thumbFile = new File(
+              [thumbnailBlob],
+              `thumb_${Date.now()}.jpeg`,
+              { type: "image/jpeg" }
+            );
+            const formData = new FormData();
+            formData.append(
+              "folderStructure",
+              `${projectName}/admin/episodeImage`
+            );
+            formData.append("keyName", thumbFile.name);
+            formData.append("content", thumbFile);
 
-              const resThumb = await dispatch(uploadMultipleImage(formData));
-              if (resThumb?.payload?.status) {
-                finalImage = resThumb.payload.data[0];
-              } else {
-                throw new Error("Thumbnail upload failed");
-              }
+            const resThumb = await dispatch(uploadMultipleImage(formData));
+            if (resThumb?.payload?.status) {
+              finalImage = resThumb.payload.data[0];
+            } else {
+              throw new Error("Thumbnail upload failed");
             }
-          } catch (err) {
-            handleError("Error generating thumbnail from video link", err);
+          } else {
+            throw new Error("Thumbnail generation failed");
           }
         }
       }
 
-      // If user provided a file as thumbnail
       if (imagePath instanceof File) {
         const formData = new FormData();
         formData.append("folderStructure", `${projectName}/admin/episodeImage`);
@@ -292,6 +289,11 @@ const EpisodeListDialogue = ({ page, size }) => {
           throw new Error("Thumbnail upload failed");
         }
       }
+
+      // ⚠️ Ensure all required fields exist
+      if (!finalVideoUrl) throw new Error("Video URL is missing");
+      if (!finalImage) throw new Error("Thumbnail is missing");
+      if (!videoDuration) throw new Error("Video duration is missing");
 
       return { finalVideoUrl, finalImage };
     } catch (err) {
