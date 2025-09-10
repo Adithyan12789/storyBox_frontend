@@ -244,7 +244,9 @@ const EpisodeListDialogue = ({ page, size }) => {
       let finalVideoUrl = videoPath || "";
       let finalImage = imagePath; // required now
 
-      if (!finalImage) throw new Error("Thumbnail is required");
+      if (!finalImage) {
+        throw new Error("Thumbnail is required"); // ensures manual upload
+      }
 
       // Upload video if selected
       if (selectedVideo) {
@@ -480,19 +482,20 @@ const EpisodeListDialogue = ({ page, size }) => {
                 <div className="mt-2">
                   <Input
                     type="file"
-                    label="Thumbnail Image *" // mark as required
+                    label="Thumbnail Image *"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
                         const thumbURL = URL.createObjectURL(file);
                         setThumbnailPreviewUrl(thumbURL);
-                        setImagePath(file); // mandatory now
+                        setImagePath(file); // this is mandatory
                         setImageError(false);
                         setErrors({ ...errors, image: "" }); // clear error
                       }
                     }}
                     accept="image/*"
                   />
+
                   {errors?.image && (
                     <span className="error mb-2" style={{ color: "red" }}>
                       {errors?.image}
@@ -522,7 +525,6 @@ const EpisodeListDialogue = ({ page, size }) => {
                     )}
                   </div>
                 </div>
-                
               </div>
             </form>
           </div>
