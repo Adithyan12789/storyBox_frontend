@@ -327,6 +327,12 @@ const EpisodeListDialogue = ({ page, size }) => {
   const handleSubmit = async () => {
     if (validation() && !isSubmitting) {
       setIsSubmitting(true);
+
+      if (!imagePath) {
+        setErrors((prev) => ({ ...prev, image: "Thumbnail is required" }));
+        return;
+      }
+
       try {
         const { finalVideoUrl, finalImage } = await processVideoData();
 
