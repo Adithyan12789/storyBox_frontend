@@ -522,27 +522,7 @@ const EpisodeListDialogue = ({ page, size }) => {
                     )}
                   </div>
                 </div>
-                {/* Thumbnail */}
-                <div className="mt-2">
-                  <div className="col-12 d-flex justify-content-start">
-                    {imageError || (!thumbnailPreviewUrl && !imagePath) ? (
-                      <img
-                        src={Male.src}
-                        width={100}
-                        height={150}
-                        alt="Fallback Image"
-                      />
-                    ) : (
-                      <img
-                        src={thumbnailPreviewUrl || imagePath}
-                        width={100}
-                        height={150}
-                        alt="Thumbnail"
-                        onError={() => setImageError(true)}
-                      />
-                    )}
-                  </div>
-                </div>
+                
               </div>
             </form>
           </div>
