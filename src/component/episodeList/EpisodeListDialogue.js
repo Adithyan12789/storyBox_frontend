@@ -81,22 +81,34 @@ const EpisodeListDialogue = ({ page, size }) => {
       return;
     }
 
+    // Clear any existing URL input
+    setVideoPath("");
+    setSelectedVideo(file);
+
     const videoURL = URL.createObjectURL(file);
     setVideoPreviewUrl(videoURL);
-    setSelectedVideo(file);
-    setVideoPath(""); // clear URL if uploading
 
     const videoElement = document.createElement("video");
     videoElement.src = videoURL;
 
-    videoElement.addEventListener("loadedmetadata", async () => {
+    videoElement.addEventListener("loadedmetadata", () => {
       setVideoDuration(videoElement.duration);
 
-      const thumbnailBlob = await generateThumbnailBlob(file);
-      if (thumbnailBlob) {
-        const thumbnailURL = URL.createObjectURL(thumbnailBlob);
-        setThumbnailPreviewUrl(thumbnailURL);
-      }
+      // Generate thumbnail
+      generateThumbnailBlob(file).then((thumbnailBlob) => {
+        if (thumbnailBlob) {
+          const thumbnailURL = URL.createObjectURL(thumbnailBlob);
+          setThumbnailPreviewUrl(thumbnailURL);
+
+          // Also set the thumbnail as the imagePath for submission
+          const thumbnailFile = new File(
+            [thumbnailBlob],
+            `${file.name.replace(/\.[^/.]+$/, "")}_thumbnail.jpeg`,
+            { type: "image/jpeg" }
+          );
+          setImagePath(thumbnailFile);
+        }
+      });
     });
 
     setErrors({ ...errors, video: "" });
@@ -196,7 +208,7 @@ const EpisodeListDialogue = ({ page, size }) => {
     let error = {};
     let isValid = true;
 
-    if (episodeNumber === "") {
+    if (episodeNumber === "" || episodeNumber === null) {
       isValid = false;
       error["episodeNumber"] = "Please enter episode number";
     }
@@ -208,19 +220,19 @@ const EpisodeListDialogue = ({ page, size }) => {
 
     if (!imagePath) {
       isValid = false;
-      error["image"] = "Thumbnail image is required"; // new validation
+      error["image"] = "Thumbnail image is required";
     }
 
-    if (
-      episodeNumber > setting?.freeEpisodesForNonVip &&
-      (!coin || coin === null)
-    ) {
-      if (coin < 0) {
+    if (episodeNumber > setting?.freeEpisodesForNonVip) {
+      if (coin === null || coin === undefined) {
         isValid = false;
-        error["coin"] = "Please enter valid coin";
+        error["coin"] = "Please enter coin amount";
+      } else if (coin < 0) {
+        isValid = false;
+        error["coin"] = "Please enter valid coin amount";
       } else if (coin === 0) {
         isValid = false;
-        error["coin"] = "Coins should not be zero";
+        error["coin"] = "Coins should not be zero for paid episodes";
       }
     }
 
@@ -245,7 +257,7 @@ const EpisodeListDialogue = ({ page, size }) => {
       let finalImage = imagePath; // required now
 
       if (!finalImage) {
-        throw new Error("Thumbnail is required"); // ensures manual upload
+        throw new Error("Thumbnail is required");
       }
 
       // Upload video if selected
@@ -255,14 +267,25 @@ const EpisodeListDialogue = ({ page, size }) => {
         finalVideoUrl = uploadedData.data.videoUrl;
       }
 
+      // Handle thumbnail image - check if it's a File (new upload) or already a URL
       if (imagePath instanceof File) {
+        // New thumbnail upload
         const formData = new FormData();
         formData.append("folderStructure", `${projectName}/admin/episodeImage`);
         formData.append("keyName", imagePath.name);
         formData.append("content", imagePath);
         const resThumb = await dispatch(uploadMultipleImage(formData));
-        if (resThumb?.payload?.status) finalImage = resThumb.payload.data[0];
-        else throw new Error("Thumbnail upload failed");
+        if (resThumb?.payload?.status) {
+          finalImage = resThumb.payload.data[0];
+        } else {
+          throw new Error("Thumbnail upload failed");
+        }
+      } else if (typeof imagePath === "string") {
+        // Image is already a URL (from editing existing episode)
+        // No need to re-upload, just use the existing URL
+        finalImage = imagePath;
+      } else {
+        throw new Error("Invalid thumbnail format");
       }
 
       if (!finalVideoUrl) throw new Error("Video URL is missing");
@@ -514,9 +537,8 @@ const EpisodeListDialogue = ({ page, size }) => {
                     ) : (
                       <img
                         src={
-                          typeof imagePath === "string"
-                            ? imagePath
-                            : thumbnailPreviewUrl
+                          thumbnailPreviewUrl ||
+                          (typeof imagePath === "string" ? imagePath : Male.src)
                         }
                         width={100}
                         height={150}
