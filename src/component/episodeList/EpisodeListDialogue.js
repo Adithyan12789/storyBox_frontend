@@ -476,22 +476,29 @@ const EpisodeListDialogue = ({ page, size }) => {
                     </span>
                   )}
                 </div>
-                // Inside your form, below Upload Video / Video Link section
+
                 <div className="mt-2">
                   <Input
                     type="file"
-                    label="Thumbnail Image (optional)"
+                    label="Thumbnail Image *" // mark as required
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
                         const thumbURL = URL.createObjectURL(file);
                         setThumbnailPreviewUrl(thumbURL);
-                        setImagePath(file); // save file to send to backend
+                        setImagePath(file); // mandatory now
                         setImageError(false);
+                        setErrors({ ...errors, image: "" }); // clear error
                       }
                     }}
                     accept="image/*"
                   />
+                  {errors?.image && (
+                    <span className="error mb-2" style={{ color: "red" }}>
+                      {errors?.image}
+                    </span>
+                  )}
+
                   <div className="col-12 d-flex justify-content-start mt-2">
                     {imageError || (!thumbnailPreviewUrl && !imagePath) ? (
                       <img
