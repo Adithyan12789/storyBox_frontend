@@ -255,19 +255,14 @@ const EpisodeListDialogue = ({ page, size }) => {
         finalVideoUrl = uploadedData.data.videoUrl;
       }
 
-      // Upload the thumbnail image
       if (imagePath instanceof File) {
         const formData = new FormData();
         formData.append("folderStructure", `${projectName}/admin/episodeImage`);
         formData.append("keyName", imagePath.name);
         formData.append("content", imagePath);
-
         const resThumb = await dispatch(uploadMultipleImage(formData));
-        if (resThumb?.payload?.status) {
-          finalImage = resThumb.payload.data[0];
-        } else {
-          throw new Error("Thumbnail upload failed");
-        }
+        if (resThumb?.payload?.status) finalImage = resThumb.payload.data[0];
+        else throw new Error("Thumbnail upload failed");
       }
 
       if (!finalVideoUrl) throw new Error("Video URL is missing");
