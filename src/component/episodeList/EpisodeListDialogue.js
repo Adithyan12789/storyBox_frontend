@@ -101,11 +101,13 @@ const EpisodeListDialogue = ({ page, size }) => {
 
     setErrors({ ...errors, video: "" });
   };
+  
+  const imgPath = "https://storybox-backend.onrender.com";
 
   const getFullImagePath = (path) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
-    return `${process.env.NEXT_PUBLIC_BASE_URL}/${path}`;
+    return `${imgPath}/${path}`;
   };
 
   const generateThumbnailBlob = async (file) => {
