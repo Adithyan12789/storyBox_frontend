@@ -233,7 +233,6 @@ const EpisodeListDialogue = ({ page, size }) => {
     dispatch(closeDialog());
   };
 
-  // 🔹 Common logic for handling video file or link
   const processVideoData = async () => {
     try {
       let uploadedData = null;
@@ -244,35 +243,53 @@ const EpisodeListDialogue = ({ page, size }) => {
         uploadedData = await uploadVideo();
         if (!uploadedData?.status) throw new Error("Failed to upload video");
         finalVideoUrl = uploadedData.data.videoUrl;
-        finalImage = uploadedData.data.videoImage;
+        // Use custom thumbnail if provided, else use generated one
+        if (!(imagePath instanceof File))
+          finalImage = uploadedData.data.videoImage;
       } else if (videoPath) {
-        try {
-          const thumbnailBlob = await generateThumbnailFromUrl(videoPath);
-          if (thumbnailBlob) {
-            const thumbFile = new File(
-              [thumbnailBlob],
-              `thumb_${Date.now()}.jpeg`,
-              {
-                type: "image/jpeg",
-              }
-            );
-            const formData = new FormData();
-            formData.append(
-              "folderStructure",
-              `${projectName}/admin/episodeImage`
-            );
-            formData.append("keyName", thumbFile.name);
-            formData.append("content", thumbFile);
+        // Generate thumbnail only if user did not provide one
+        if (!(imagePath instanceof File)) {
+          try {
+            const thumbnailBlob = await generateThumbnailFromUrl(videoPath);
+            if (thumbnailBlob) {
+              const thumbFile = new File(
+                [thumbnailBlob],
+                `thumb_${Date.now()}.jpeg`,
+                { type: "image/jpeg" }
+              );
+              const formData = new FormData();
+              formData.append(
+                "folderStructure",
+                `${projectName}/admin/episodeImage`
+              );
+              formData.append("keyName", thumbFile.name);
+              formData.append("content", thumbFile);
 
-            const resThumb = await dispatch(uploadMultipleImage(formData));
-            if (resThumb?.payload?.status) {
-              finalImage = resThumb.payload.data[0];
-            } else {
-              throw new Error("Thumbnail upload failed");
+              const resThumb = await dispatch(uploadMultipleImage(formData));
+              if (resThumb?.payload?.status) {
+                finalImage = resThumb.payload.data[0];
+              } else {
+                throw new Error("Thumbnail upload failed");
+              }
             }
+          } catch (err) {
+            handleError("Error generating thumbnail from video link", err);
           }
-        } catch (err) {
-          handleError("Error generating thumbnail from video link", err);
+        }
+      }
+
+      // If user provided a file as thumbnail
+      if (imagePath instanceof File) {
+        const formData = new FormData();
+        formData.append("folderStructure", `${projectName}/admin/episodeImage`);
+        formData.append("keyName", imagePath.name);
+        formData.append("content", imagePath);
+
+        const resThumb = await dispatch(uploadMultipleImage(formData));
+        if (resThumb?.payload?.status) {
+          finalImage = resThumb.payload.data[0];
+        } else {
+          throw new Error("Thumbnail upload failed");
         }
       }
 
@@ -412,7 +429,6 @@ const EpisodeListDialogue = ({ page, size }) => {
                     </span>
                   )}
                 </div>
-
                 {episodeNumber > setting?.freeEpisodesForNonVip && (
                   <div className="mt-2">
                     <Input
@@ -439,7 +455,6 @@ const EpisodeListDialogue = ({ page, size }) => {
                     )}
                   </div>
                 )}
-
                 {/* Upload or Link */}
                 <div className="mt-2">
                   <Input
@@ -482,7 +497,45 @@ const EpisodeListDialogue = ({ page, size }) => {
                     </span>
                   )}
                 </div>
-
+                // Inside your form, below Upload Video / Video Link section
+                <div className="mt-2">
+                  <Input
+                    type="file"
+                    label="Thumbnail Image (optional)"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const thumbURL = URL.createObjectURL(file);
+                        setThumbnailPreviewUrl(thumbURL);
+                        setImagePath(file); // save file to send to backend
+                        setImageError(false);
+                      }
+                    }}
+                    accept="image/*"
+                  />
+                  <div className="col-12 d-flex justify-content-start mt-2">
+                    {imageError || (!thumbnailPreviewUrl && !imagePath) ? (
+                      <img
+                        src={Male.src}
+                        width={100}
+                        height={150}
+                        alt="Fallback Image"
+                      />
+                    ) : (
+                      <img
+                        src={
+                          typeof imagePath === "string"
+                            ? imagePath
+                            : thumbnailPreviewUrl
+                        }
+                        width={100}
+                        height={150}
+                        alt="Thumbnail"
+                        onError={() => setImageError(true)}
+                      />
+                    )}
+                  </div>
+                </div>
                 {/* Thumbnail */}
                 <div className="mt-2">
                   <div className="col-12 d-flex justify-content-start">

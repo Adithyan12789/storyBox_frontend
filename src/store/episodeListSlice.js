@@ -37,6 +37,7 @@ export const addVideoList = createAsyncThunk("admin/addVideoList/add",
         return response;
     }
 )
+
 export const uploadImage = createAsyncThunk("admin/uploadImage/add",
     async (payload) => {
         // console.log("payloaddd", payload)
