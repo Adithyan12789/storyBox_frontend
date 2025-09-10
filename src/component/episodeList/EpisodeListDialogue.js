@@ -14,7 +14,6 @@ import {
 import { useRouter } from "next/router";
 import Male from "../../assets/images/placeHolder.png";
 import { projectName } from "../../util/config";
-import { getSetting } from "../../store/settingSlice";
 import { setToast } from "../../util/toastServices";
 
 const style = {
@@ -26,19 +25,19 @@ const style = {
   backgroundColor: "background.paper",
   borderRadius: "5px",
   border: "1px solid #C9C9C9",
-  boxShadow: "24px",
+  boxShadow: "24",
 };
 
 const EpisodeListDialogue = ({ page, size }) => {
   const { dialogue: open, dialogueData } = useSelector(
     (state) => state.dialogue
   );
+
   const { setting } = useSelector((state) => state.setting);
 
   const [filmList, setFilmList] = useState("");
   const [episodeNumber, setEpisodeNumber] = useState("");
   const [imagePath, setImagePath] = useState(null);
-  const [videoPath, setVideoPath] = useState(""); // URL or uploaded
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
@@ -62,8 +61,6 @@ const EpisodeListDialogue = ({ page, size }) => {
           : dialogueData?.episodeNumber || dialogueData?.totalShortVideos
       );
       setImagePath(dialogueData?.videoImage);
-      setVideoPath(dialogueData?.videoUrl || "");
-      setCoin(dialogueData?.coin || 0);
     }
   }, [dialogueData]);
 
@@ -81,34 +78,21 @@ const EpisodeListDialogue = ({ page, size }) => {
       return;
     }
 
-    // Clear any existing URL input
-    setVideoPath("");
-    setSelectedVideo(file);
-
     const videoURL = URL.createObjectURL(file);
     setVideoPreviewUrl(videoURL);
+    setSelectedVideo(file);
 
     const videoElement = document.createElement("video");
     videoElement.src = videoURL;
 
-    videoElement.addEventListener("loadedmetadata", () => {
+    videoElement.addEventListener("loadedmetadata", async () => {
       setVideoDuration(videoElement.duration);
 
-      // Generate thumbnail
-      generateThumbnailBlob(file).then((thumbnailBlob) => {
-        if (thumbnailBlob) {
-          const thumbnailURL = URL.createObjectURL(thumbnailBlob);
-          setThumbnailPreviewUrl(thumbnailURL);
-
-          // Also set the thumbnail as the imagePath for submission
-          const thumbnailFile = new File(
-            [thumbnailBlob],
-            `${file.name.replace(/\.[^/.]+$/, "")}_thumbnail.jpeg`,
-            { type: "image/jpeg" }
-          );
-          setImagePath(thumbnailFile);
-        }
-      });
+      const thumbnailBlob = await generateThumbnailBlob(file);
+      if (thumbnailBlob) {
+        const thumbnailURL = URL.createObjectURL(thumbnailBlob);
+        setThumbnailPreviewUrl(thumbnailURL);
+      }
     });
 
     setErrors({ ...errors, video: "" });
@@ -138,50 +122,6 @@ const EpisodeListDialogue = ({ page, size }) => {
     });
   };
 
-  const generateThumbnailFromUrl = (url) => {
-    return new Promise((resolve, reject) => {
-      try {
-        const video = document.createElement("video");
-        video.crossOrigin = "anonymous";
-        video.src = url;
-        video.preload = "metadata";
-
-        video.onloadedmetadata = () => {
-          if (video.duration === Infinity || isNaN(video.duration)) {
-            reject(new Error("Invalid or unsupported video URL"));
-          } else {
-            video.currentTime = 1;
-          }
-        };
-
-        video.onseeked = () => {
-          try {
-            const canvas = document.createElement("canvas");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(
-              (blob) => {
-                if (!blob) reject(new Error("Failed to generate thumbnail"));
-                resolve(blob);
-              },
-              "image/jpeg",
-              0.75
-            );
-          } catch (err) {
-            reject(err);
-          }
-        };
-
-        video.onerror = () =>
-          reject(new Error("Failed to load video from URL"));
-      } catch (err) {
-        reject(err);
-      }
-    });
-  };
-
   const uploadVideo = async () => {
     if (!selectedVideo) return null;
 
@@ -208,31 +148,26 @@ const EpisodeListDialogue = ({ page, size }) => {
     let error = {};
     let isValid = true;
 
-    if (episodeNumber === "" || episodeNumber === null) {
+    if (episodeNumber === "") {
       isValid = false;
       error["episodeNumber"] = "Please enter episode number";
     }
 
-    if (!videoPath && !selectedVideo) {
+    if (!selectedVideo) {
       isValid = false;
-      error["video"] = "Please upload a video or provide a link";
+      error["video"] = "Please upload a video";
     }
 
-    if (!imagePath) {
-      isValid = false;
-      error["image"] = "Thumbnail image is required";
-    }
-
-    if (episodeNumber > setting?.freeEpisodesForNonVip) {
-      if (coin === null || coin === undefined) {
+    if (
+      episodeNumber > setting?.freeEpisodesForNonVip &&
+      (!coin || coin === null)
+    ) {
+      if (coin < 0) {
         isValid = false;
-        error["coin"] = "Please enter coin amount";
-      } else if (coin < 0) {
-        isValid = false;
-        error["coin"] = "Please enter valid coin amount";
+        error["coin"] = "Please enter valid coin";
       } else if (coin === 0) {
         isValid = false;
-        error["coin"] = "Coins should not be zero for paid episodes";
+        error["coin"] = "Coins should not be zero";
       }
     }
 
@@ -250,49 +185,17 @@ const EpisodeListDialogue = ({ page, size }) => {
     dispatch(closeDialog());
   };
 
-  const processVideoData = async () => {
+  const handleProcessVideo = async () => {
     try {
-      let uploadedData = null;
-      let finalVideoUrl = videoPath || "";
-      let finalImage = imagePath; // required now
+      if (!selectedVideo) throw new Error("No video selected");
 
-      if (!finalImage) {
-        throw new Error("Thumbnail is required");
-      }
+      const uploadedData = await uploadVideo();
+      if (!uploadedData?.status) throw new Error("Failed to upload video");
 
-      // Upload video if selected
-      if (selectedVideo) {
-        uploadedData = await uploadVideo();
-        if (!uploadedData?.status) throw new Error("Failed to upload video");
-        finalVideoUrl = uploadedData.data.videoUrl;
-      }
-
-      // Handle thumbnail image - check if it's a File (new upload) or already a URL
-      if (imagePath instanceof File) {
-        // New thumbnail upload
-        const formData = new FormData();
-        formData.append("folderStructure", `${projectName}/admin/episodeImage`);
-        formData.append("keyName", imagePath.name);
-        formData.append("content", imagePath);
-        const resThumb = await dispatch(uploadMultipleImage(formData));
-        if (resThumb?.payload?.status) {
-          finalImage = resThumb.payload.data[0];
-        } else {
-          throw new Error("Thumbnail upload failed");
-        }
-      } else if (typeof imagePath === "string") {
-        // Image is already a URL (from editing existing episode)
-        // No need to re-upload, just use the existing URL
-        finalImage = imagePath;
-      } else {
-        throw new Error("Invalid thumbnail format");
-      }
-
-      if (!finalVideoUrl) throw new Error("Video URL is missing");
-      if (!finalImage) throw new Error("Thumbnail is missing");
-      if (!videoDuration) throw new Error("Video duration is missing");
-
-      return { finalVideoUrl, finalImage };
+      return {
+        finalVideoUrl: uploadedData.data.videoUrl,
+        finalImage: uploadedData.data.videoImage,
+      };
     } catch (err) {
       handleError("Video processing failed", err);
       throw err;
@@ -303,7 +206,7 @@ const EpisodeListDialogue = ({ page, size }) => {
     if (validation() && !isSubmitting) {
       setIsSubmitting(true);
       try {
-        const { finalVideoUrl, finalImage } = await processVideoData();
+        const { finalVideoUrl, finalImage } = await handleProcessVideo();
 
         const data = {
           movieSeriesId: filmList,
@@ -342,19 +245,12 @@ const EpisodeListDialogue = ({ page, size }) => {
       }
     }
   };
+
   const handleSubmit = async () => {
     if (validation() && !isSubmitting) {
       setIsSubmitting(true);
-
-      if (!imagePath) {
-        setErrors((prev) => ({ ...prev, image: "Thumbnail is required" }));
-        return;
-      }
-
       try {
-        const { finalVideoUrl, finalImage } = await processVideoData();
-
-        if (!finalVideoUrl) throw new Error("Video URL is missing");
+        const { finalVideoUrl, finalImage } = await handleProcessVideo();
 
         const data = {
           movieSeriesId: dialogueData?._id,
@@ -434,6 +330,7 @@ const EpisodeListDialogue = ({ page, size }) => {
                     </span>
                   )}
                 </div>
+
                 {episodeNumber > setting?.freeEpisodesForNonVip && (
                   <div className="mt-2">
                     <Input
@@ -460,7 +357,8 @@ const EpisodeListDialogue = ({ page, size }) => {
                     )}
                   </div>
                 )}
-                {/* Upload or Link */}
+
+                {/* Upload Video Only */}
                 <div className="mt-2">
                   <Input
                     type="file"
@@ -469,25 +367,10 @@ const EpisodeListDialogue = ({ page, size }) => {
                     accept="video/*"
                   />
 
-                  <div className="mt-3">
-                    <Input
-                      type="text"
-                      label="Video Link (optional)"
-                      placeholder="Paste video URL"
-                      value={videoPath}
-                      onChange={(e) => {
-                        setVideoPath(e.target.value);
-                        setSelectedVideo(null);
-                        setVideoPreviewUrl(null);
-                        setErrors({ ...errors, video: "" });
-                      }}
-                    />
-                  </div>
-
                   <div className="col-12 d-flex justify-content-start">
-                    {(videoPreviewUrl || videoPath) && (
+                    {videoPreviewUrl && (
                       <video
-                        src={videoPreviewUrl || videoPath}
+                        src={videoPreviewUrl}
                         controls
                         className="mt-3 rounded float-left mb-2"
                         height="100px"
@@ -503,30 +386,9 @@ const EpisodeListDialogue = ({ page, size }) => {
                   )}
                 </div>
 
+                {/* Thumbnail */}
                 <div className="mt-2">
-                  <Input
-                    type="file"
-                    label="Thumbnail Image *"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const thumbURL = URL.createObjectURL(file);
-                        setThumbnailPreviewUrl(thumbURL);
-                        setImagePath(file); // this is mandatory
-                        setImageError(false);
-                        setErrors({ ...errors, image: "" }); // clear error
-                      }
-                    }}
-                    accept="image/*"
-                  />
-
-                  {errors?.image && (
-                    <span className="error mb-2" style={{ color: "red" }}>
-                      {errors?.image}
-                    </span>
-                  )}
-
-                  <div className="col-12 d-flex justify-content-start mt-2">
+                  <div className="col-12 d-flex justify-content-start">
                     {imageError || (!thumbnailPreviewUrl && !imagePath) ? (
                       <img
                         src={Male.src}
@@ -536,10 +398,7 @@ const EpisodeListDialogue = ({ page, size }) => {
                       />
                     ) : (
                       <img
-                        src={
-                          thumbnailPreviewUrl ||
-                          (typeof imagePath === "string" ? imagePath : Male.src)
-                        }
+                        src={thumbnailPreviewUrl || imagePath}
                         width={100}
                         height={150}
                         alt="Thumbnail"
@@ -568,12 +427,8 @@ const EpisodeListDialogue = ({ page, size }) => {
                 btnName={isSubmitting ? "Submitting..." : "Submit"}
                 type="button"
                 newClass="submit-btn"
+                style={{ borderRadius: "0.5rem", width: "80px", marginLeft: "10px" }}
                 disabled={isSubmitting}
-                style={{
-                  borderRadius: "0.5rem",
-                  width: "80px",
-                  marginLeft: "10px",
-                }}
               />
             </div>
             {errors?.submit && (

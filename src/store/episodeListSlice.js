@@ -45,6 +45,7 @@ export const uploadImage = createAsyncThunk("admin/uploadImage/add",
         return response;
     }
 )
+
 export const uploadMultipleImage = createAsyncThunk("admin/uploadImage/add",
     async (payload) => {
         // console.log("payloaddd", payload)
