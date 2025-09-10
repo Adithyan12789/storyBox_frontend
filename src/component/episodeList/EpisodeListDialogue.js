@@ -105,11 +105,21 @@ const EpisodeListDialogue = ({ page, size }) => {
   const getFullImagePath = (path) => {
     if (!path) return null;
 
-    // If it's already a full URL, return as is
-    if (path.startsWith("http")) return path;
+    // If already pointing to frontend, replace it with backend
+    if (path.startsWith("https://story-box-frontend.vercel.app")) {
+      return path.replace(
+        "https://story-box-frontend.vercel.app",
+        process.env.NEXT_PUBLIC_BASE_URL
+      );
+    }
 
-    // Otherwise, prepend backend base URL
-    return `${process.env.NEXT_PUBLIC_BASE_URL}${path}`;
+    // If it's already a full URL (http/https), leave as is
+    if (path.startsWith("http")) {
+      return path;
+    }
+
+    // Otherwise, assume it's relative and prefix backend
+    return `${process.env.NEXT_PUBLIC_BASE_URL}/${path.replace(/^\/+/, "")}`;
   };
 
   const generateThumbnailBlob = async (file) => {
