@@ -70,7 +70,7 @@ const EpisodeListDialogue = ({ page, size }) => {
 
       if (
         dialogueData?.videoUrl &&
-        !dialogueData?.videoUrl.includes("/uploads/")
+        !dialogueData?.videoUrl.includes("/videos/")
       ) {
         setVideoInputType("link");
         setVideoLink(dialogueData.videoUrl);

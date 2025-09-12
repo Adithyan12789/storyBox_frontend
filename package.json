@@ -7,7 +7,7 @@
     "build": "next build ",
     "start": "next start -p 5001",
     "lint": "next lint",
-    "proxy": "http://localhost:3000/"
+    "proxy": "https://storybox-backend.onrender.com/"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",
