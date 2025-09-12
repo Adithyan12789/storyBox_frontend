@@ -1,5 +1,5 @@
 {
-  "name": "story-box",
+  "name": "drama-chaska",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "next build ",
     "start": "next start -p 5001",
     "lint": "next lint",
-    "proxy": "https://storybox-backend.onrender.com/"
+    "proxy": "http://localhost:3000/"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",

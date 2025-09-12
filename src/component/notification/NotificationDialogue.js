@@ -7,7 +7,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import Input from "@/extra/Input";
 import Button from "@/extra/Button";
 import { sendNotification, uploadImageNotification } from "@/store/adminSlice";
-import { projectName } from "@/util/config";
 
 const style = {
   position: "absolute",
@@ -96,7 +95,7 @@ const NotificationDialogue = () => {
     let finalImagePath = imagePreview; 
 
     if (imagePath) {  
-      const folderStructure = `${projectName}/admin/notificationImage`;
+      const folderStructure = `admin/notificationImage`;
       const formData = new FormData();
       formData.append("folderStructure", folderStructure);
       formData.append("keyName", imagePath.name);

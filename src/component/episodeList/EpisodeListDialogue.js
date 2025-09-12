@@ -15,7 +15,6 @@ import {
 } from "../../store/episodeListSlice";
 import { useRouter } from "next/router";
 import Male from "../../assets/images/placeHolder.png";
-import { projectName } from "../../util/config";
 import { setToast } from "../../util/toastServices";
 
 const style = {
@@ -222,7 +221,7 @@ const EpisodeListDialogue = ({ page, size }) => {
       console.log("Uploading file:", file.name, "to folder:", folderName);
 
       const formData = new FormData();
-formData.append("folderStructure", `${projectName}/admin/${folderName}`);
+formData.append("folderStructure", `admin/${folderName}`);
   formData.append("keyName", file.name);
   formData.append("content", file);
   

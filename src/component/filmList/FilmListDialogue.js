@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import Input from "../../extra/Input";
 import Button from "../../extra/Button";
 import Selector from "../../extra/Selector";
-import { projectName } from "../../util/config";
 import Male from "../../assets/images/placeHolder.png";
 import {
   addFilmList,
@@ -143,7 +142,7 @@ const FilmListDialogue = ({ page, size }) => {
 
       // Upload poster image if a new file is selected
       if (posterSelectedFile) {
-        const folderStructure = `${projectName}/admin/filmPoster`;
+        const folderStructure = `admin/filmPoster`;
 
         const formData = new FormData();
         formData.append("folderStructure", folderStructure);
@@ -165,7 +164,7 @@ const FilmListDialogue = ({ page, size }) => {
 
       // Upload banner image if a new file is selected
       if (bannerSelectedFile) {
-        const folderStructure = `${projectName}/admin/filmBanner`;
+        const folderStructure = `admin/filmBanner`;
         const formData = new FormData();
         formData.append("folderStructure", folderStructure);
         formData.append("keyName", bannerSelectedFile.name);

@@ -11,7 +11,6 @@ import { uploadImage } from "../store/episodeListSlice";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 
-import { projectName } from "../util/config";
 
 const profile = () => {
     const dispatch = useDispatch();
@@ -49,7 +48,7 @@ const profile = () => {
     }, [admin])
     // console.log("adminadminadmin", admin);
 
-    let folderStructure = `${projectName}/admin/adminImage`;
+    let folderStructure = `admin/adminImage`;
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
