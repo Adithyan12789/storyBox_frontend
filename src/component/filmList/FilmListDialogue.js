@@ -142,7 +142,7 @@ const FilmListDialogue = ({ page, size }) => {
 
       // Upload poster image if a new file is selected
       if (posterSelectedFile) {
-        const folderStructure = `admin/filmPoster`;
+        const folderStructure = `admin`;
 
         const formData = new FormData();
         formData.append("folderStructure", folderStructure);
@@ -164,7 +164,7 @@ const FilmListDialogue = ({ page, size }) => {
 
       // Upload banner image if a new file is selected
       if (bannerSelectedFile) {
-        const folderStructure = `admin/filmBanner`;
+        const folderStructure = `admin`;
         const formData = new FormData();
         formData.append("folderStructure", folderStructure);
         formData.append("keyName", bannerSelectedFile.name);
