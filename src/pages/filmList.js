@@ -30,7 +30,12 @@ import { warning } from "../util/Alert";
 import { getSetting } from "../store/settingSlice";
 import defaultMoviePoster from "../assets/images/default-movie-poster.jpg";
 import { setToast } from "../util/toastServices";
-import { IconEdit, IconEye, IconTrash, IconVideoPlus } from "@tabler/icons-react";
+import {
+  IconEdit,
+  IconEye,
+  IconTrash,
+  IconVideoPlus,
+} from "@tabler/icons-react";
 
 const filmList = () => {
   const dispatch = useDispatch();
@@ -41,15 +46,17 @@ const filmList = () => {
   const [size, setSize] = useState(20);
   const [data, setData] = useState([]);
   const { filmsList, totalUser } = useSelector((state) => state.filmsList);
-  
 
   useEffect(() => {
-     dispatch(getSetting());
+    dispatch(getSetting());
   }, []);
 
   useEffect(() => {
-    dispatch(getFilmList({ page, size }));
-  }, [page]);
+    dispatch(getFilmList({ page, size }))
+      .unwrap()
+      .then((res) => console.log("👉 Success result:", res))
+      .catch((err) => console.error("❌ Error result:", err));
+  }, [page, size, dispatch]);
 
   useEffect(() => {
     setData(filmsList);
@@ -72,7 +79,6 @@ const filmList = () => {
     }));
   };
   const handleIsActive = (row) => {
-    
     dispatch(filmListActive(row?._id)).then((res) => {
       if (res?.payload?.status) {
         toast.success(res?.payload?.message);
@@ -83,7 +89,6 @@ const filmList = () => {
     });
   };
   const handleIsBanner = (row) => {
-    
     dispatch(filmListBanner(row?._id)).then((res) => {
       if (res?.payload?.status) {
         toast.success(res?.payload?.message);
@@ -94,7 +99,6 @@ const filmList = () => {
     });
   };
   const handleIsTrending = (row) => {
-    
     dispatch(filmListTrending(row?._id)).then((res) => {
       if (res?.payload?.status) {
         toast.success(res?.payload?.message);
@@ -113,7 +117,7 @@ const filmList = () => {
   };
 
   const handleDeleteFilm = (row) => {
-    // 
+    //
     const data = warning();
     data.then((res) => {
       if (res) {
@@ -327,19 +331,18 @@ const filmList = () => {
         <div className="action-button">
           <Button
             btnIcon={<IconEdit className="text-secondary" />}
-                onClick={() => {
-                  dispatch(
-                    openDialog({
-                      type: "filmList",
-                      data: row,
-                    })
-                  );
-                }}
+            onClick={() => {
+              dispatch(
+                openDialog({
+                  type: "filmList",
+                  data: row,
+                })
+              );
+            }}
           />
           <Button
             btnIcon={<IconTrash className="text-secondary" />}
             onClick={() => {
-              
               handleDeleteFilm(row);
             }}
           />
