@@ -9,6 +9,8 @@ export const getFilmList = createAsyncThunk(
     const response = await apiInstanceFetch.get(
       `/api/admin/movieSeries/fetchAllMediaContent?start=${payload?.page}&limit=${payload?.size}`
     );
+
+    console.log("response", response);
     return response;
   }
 );

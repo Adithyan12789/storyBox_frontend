@@ -136,6 +136,8 @@ const profile = () => {
         }
     };
 
+    console.log("imagePath: ", imagePath)
+
     return (
         <div className="userPage">
             <div className="profile-page payment-setting card1 p-0">

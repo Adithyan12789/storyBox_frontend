@@ -14,7 +14,6 @@ import {
   getFilmList,
   uploadImage,
 } from "../../store/filmListSlice";
-import Image from "next/image";
 import { style } from "../../util/commonData";
 
 
@@ -142,7 +141,7 @@ const FilmListDialogue = ({ page, size }) => {
 
       // Upload poster image if a new file is selected
       if (posterSelectedFile) {
-        const folderStructure = `admin`;
+        const folderStructure = `admin/FilmPoster`;
 
         const formData = new FormData();
         formData.append("folderStructure", folderStructure);
@@ -164,7 +163,7 @@ const FilmListDialogue = ({ page, size }) => {
 
       // Upload banner image if a new file is selected
       if (bannerSelectedFile) {
-        const folderStructure = `admin`;
+        const folderStructure = `admin/FilmBanner`; 
         const formData = new FormData();
         formData.append("folderStructure", folderStructure);
         formData.append("keyName", bannerSelectedFile.name);
