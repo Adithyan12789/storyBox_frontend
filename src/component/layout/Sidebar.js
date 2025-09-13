@@ -171,9 +171,9 @@ const Sidebar = ({ children }) => {
               href="/dashboard"
               className="d-flex align-items-center cursor-pointer"
             >
-              <Image src={Logo.src} alt="logo" width={35} height={35} />
+              
               <span className="fs-3 fw-bold" style={{ color: "#e83a57" }}>
-                {projectName}
+                DramaChaska
               </span>
             </Link>
           </div>
