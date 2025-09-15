@@ -10,7 +10,7 @@ export const getFilmList = createAsyncThunk(
       `/api/admin/movieSeries/fetchAllMediaContent?start=${payload?.page}&limit=${payload?.size}`
     );
 
-    console.log("response", response);
+    console.log("getFilmResponse: ", response);
     return response;
   }
 );

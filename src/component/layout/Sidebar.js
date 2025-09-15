@@ -171,7 +171,6 @@ const Sidebar = ({ children }) => {
               href="/dashboard"
               className="d-flex align-items-center cursor-pointer"
             >
-              
               <span className="fs-3 fw-bold" style={{ color: "#e83a57" }}>
                 DramaChaska
               </span>
