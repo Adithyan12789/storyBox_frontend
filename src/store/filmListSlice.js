@@ -21,6 +21,9 @@ export const getFilmListVideo = createAsyncThunk(
     const response = await apiInstanceFetch.get(
       `/api/admin/shortVideo/retrieveMovieSeriesVideoData?start=${payload?.start}&limit=${payload?.limit}&movieSeriesId=${payload?.movieSeriesId}`
     );
+
+    console.log("getFilmListVideo: ", response);
+
     return response;
   }
 );
@@ -53,6 +56,8 @@ export const editFilmList = createAsyncThunk(
       `/api/admin/movieSeries/updateContent`,
       payload
     );
+
+    console.log("editFilmList: ", response);
     return response;
   }
 );
@@ -120,6 +125,8 @@ export const updateEpisodePosition = createAsyncThunk(
     const response = await apiInstanceFetch.patch(
       `/api/admin/shortVideo/editShortVideo?movieSeriesId=${movieSeriesId}&shortVideoId=${shortVideoId}&newEpisodePosition=${newEpisodePosition}`
     );
+
+    console.log("updateEpisodePosition: ", response);
     return response;
   }
 );
@@ -139,6 +146,8 @@ export const reorderEpisodes = createAsyncThunk(
     );
 
     const responses = await Promise.all(updatePromises);
+
+    console.log("reorderEpisodes responses: ", responses);
 
     return {
       status: true,

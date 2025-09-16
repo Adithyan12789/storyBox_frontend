@@ -21,6 +21,7 @@
     "apexcharts": "^3.41.1",
     "axios": "^1.6.7",
     "dayjs": "^1.11.10",
+    "hls.js": "^1.6.12",
     "html2canvas": "^1.4.1",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",

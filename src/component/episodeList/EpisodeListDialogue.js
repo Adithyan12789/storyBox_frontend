@@ -221,10 +221,10 @@ const EpisodeListDialogue = ({ page, size }) => {
       console.log("Uploading file:", file.name, "to folder:", folderName);
 
       const formData = new FormData();
-formData.append("folderStructure", `admin/${folderName}`);
-  formData.append("keyName", file.name);
-  formData.append("content", file);
-  
+      formData.append("folderStructure", `admin/${folderName}`);
+      formData.append("keyName", file.name);
+      formData.append("content", file);
+
       const response = await dispatch(uploadImage(formData));
       console.log("Upload response payload:", response.payload);
 
@@ -381,15 +381,14 @@ formData.append("folderStructure", `admin/${folderName}`);
         console.log("Processed data - finalImage:", finalImage);
         console.log("Processed data - finalVideoUrl:", finalVideoUrl);
 
-const data = {
-  movieSeriesId,
-  episodeNumber,
-  duration: videoDuration ?? 0,
-  videoImage: finalImage || "", // finalImage must be string path
-  videoUrl: finalVideoUrl || "", // finalVideoUrl must be string path
-  coin: coin ?? 0,
-};
-
+        const data = {
+          movieSeriesId,
+          episodeNumber,
+          duration: videoDuration ?? 0,
+          videoImage: finalImage || "", // finalImage must be string path
+          videoUrl: finalVideoUrl || "", // finalVideoUrl must be string path
+          coin: coin ?? 0,
+        };
 
         console.log("Submitting payload:", data);
 

@@ -1,22 +1,24 @@
-import { Box, Modal, Typography } from '@mui/material';
-import Button from '../../extra/Button';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
-import { closeDialog } from '../../store/dialogueSlice';
-import { baseURL } from '../../util/config';
-import { getVideoDetails } from '../../store/episodeListSlice';
-import { setToast } from '../../util/toastServices';
+import { Box, Modal, Typography } from "@mui/material";
+import Button from "../../extra/Button";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { closeDialog } from "../../store/dialogueSlice";
+import { baseURL } from "../../util/config";
+import { getVideoDetails } from "../../store/episodeListSlice";
+import { setToast } from "../../util/toastServices";
+import Hls from "hls.js";
+
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 600,
-  bgcolor: 'background.paper',
-  borderRadius: '13px',
-  border: '1px solid #C9C9C9',
+  bgcolor: "background.paper",
+  borderRadius: "13px",
+  border: "1px solid #C9C9C9",
   boxShadow: 24,
-  p: '19px',
+  p: "19px",
 };
 
 const VideoDialogue = () => {
@@ -26,6 +28,7 @@ const VideoDialogue = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [addPostOpen, setAddPostOpen] = useState(false);
+  const videoRef = useRef(null);
   // const { videoData } = useSelector((state) => state?.video);
 
   useEffect(() => {
@@ -33,8 +36,50 @@ const VideoDialogue = () => {
   }, []);
 
   useEffect(() => {
+    console.log("dialogue: ", dialogue);
     setAddPostOpen(dialogue);
   }, [dialogue]);
+
+  useEffect(() => {
+    console.log("getVideo details:", getVideo);
+  }, [getVideo]);
+
+  useEffect(() => {
+    if (getVideo?.videoUrl && videoRef.current) {
+      const url = getVideo.videoUrl;
+      console.log("Final video URL:", url);
+
+      let hls;
+
+      if (url.endsWith(".m3u8") && Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(videoRef.current);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log("HLS manifest loaded");
+        });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error("HLS error:", data);
+          setVideoError(true);
+        });
+      } else {
+        // For mp4 or Safari native HLS
+        videoRef.current.src = url;
+      }
+
+      // ✅ cleanup on unmount/change
+      return () => {
+        if (hls) {
+          hls.destroy();
+        }
+      };
+    }
+  }, [getVideo]);
+
+  console.log("dialogueData:", dialogueData);
+  console.log("getVideo:", getVideo);
 
   const handleCloseAddCategory = () => {
     setAddPostOpen(false);
@@ -46,7 +91,7 @@ const VideoDialogue = () => {
   };
 
   const maxLength = 10; // Number of characters to show initially
-  const caption = dialogueData?.caption || '';
+  const caption = dialogueData?.caption || "";
   return (
     <>
       <div>
@@ -59,7 +104,7 @@ const VideoDialogue = () => {
           <Box sx={style} className="create-channel-model">
             <Typography
               id="modal-modal-title"
-              style={{ borderBottom: '1px solid #000' }}
+              style={{ borderBottom: "1px solid #000" }}
               variant="h6"
               component="h2"
             >
@@ -89,24 +134,23 @@ const VideoDialogue = () => {
             <div className="row mt-3">
               {!videoError ? (
                 <video
+                  ref={videoRef}
                   controls
-                  src={getVideo?.videoUrl}
-                  width={0}
                   autoPlay
                   height={350}
-                  style={{ objectFit: 'contain', width: 'full' }}
+                  style={{ objectFit: "contain", width: "100%" }}
                   onError={() => setVideoError(true)}
                 />
               ) : (
                 <div
                   style={{
-                    height: '350px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    height: "350px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  {' '}
+                  {" "}
                   <span>Video Not Found</span>
                 </div>
               )}
@@ -115,8 +159,8 @@ const VideoDialogue = () => {
             <div className="mt-3 pt-3 d-flex justify-content-end">
               <Button
                 onClick={handleCloseAddCategory}
-                btnName={'Close'}
-                newClass={'close-model-btn'}
+                btnName={"Close"}
+                newClass={"close-model-btn"}
               />
             </div>
           </Box>

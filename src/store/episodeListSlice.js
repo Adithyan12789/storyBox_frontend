@@ -8,18 +8,26 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 export const getEpisodeList = createAsyncThunk("admin/getEpisodeList/get",
     async (payload) => {
         const response = await apiInstanceFetch.get(`/api/admin/shortVideo/fetchShortVideos?start=${payload?.page}&limit=${payload?.size}`)
+
+        console.log("getEpisodeList: ", response);
         return response;
     }
 )
 export const getVideoDetails = createAsyncThunk("admin/getVideoDetails/get",
     async (payload) => {
         const response = await apiInstanceFetch.get(`/api/admin/shortVideo/getShortVideoInfo?shortVideoId=${payload}`)
+
+        console.log("getVideoDetails: ", response);
+
         return response.data;
     }
 )
 export const getFilmListVideo = createAsyncThunk("admin/getFilmListVideo/get",
     async (payload) => {
         const response = await apiInstanceFetch.get(`/api/admin/shortVideo/retrieveMovieSeriesVideoData?start=${payload?.start}&limit=${payload?.limit}&movieSeriesId=${payload?.movieSeriesId}`)
+
+        console.log("getFilmListVideo: ", response);
+        
         return response.data;
     }
 )

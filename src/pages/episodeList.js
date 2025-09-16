@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import RootLayout from "../component/layout/Layout";
 import Button from "../extra/Button";
 import Table from "../extra/Table";
@@ -17,6 +17,8 @@ import Image from "next/image";
 import { warning } from "../util/Alert";
 import defaultPsoter from "@/assets/images/default-movie-poster.jpg";
 import { deleteShortVideo } from "../store/filmListSlice";
+import Hls from "hls.js";
+
 import {
   IconEdit,
   IconLockFilled,
@@ -38,7 +40,7 @@ const convertMilliseconds = (ms) => {
   return result.length > 0 ? result.join(" ") : "0s";
 };
 
-const episodeList = () => {
+const EpisodeList = () => {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
@@ -46,8 +48,6 @@ const episodeList = () => {
 
   const { dialogueType } = useSelector((state) => state.dialogue);
   const { episodeList, totalUser } = useSelector((state) => state.episodeList);
-
-  
 
   const handlePageChange = (pageNumber) => {
     setPage(pageNumber);
@@ -59,7 +59,7 @@ const episodeList = () => {
   useEffect(() => {
     setData(episodeList);
   }, [episodeList]);
-  
+
   useEffect(() => {
     dispatch(getEpisodeList({ page, size }));
   }, [page, size]);
@@ -127,27 +127,57 @@ const episodeList = () => {
         body: "video",
         Cell: ({ row }) => {
           const [videoError, setVideoError] = useState(false);
+          const videoRef = useRef(null);
+
+          useEffect(() => {
+            if (row?.videoUrl && videoRef.current) {
+              let hls;
+
+              if (row.videoUrl.endsWith(".m3u8") && Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(row.videoUrl);
+                hls.attachMedia(videoRef.current);
+
+                hls.on(Hls.Events.ERROR, () => {
+                  setVideoError(true);
+                });
+              } else {
+                // fallback for Safari or MP4
+                videoRef.current.src = row.videoUrl;
+              }
+
+              return () => {
+                if (hls) {
+                  hls.destroy();
+                }
+              };
+            }
+          }, [row?.videoUrl]);
+
           return (
             <>
               {!videoError ? (
                 <video
+                  ref={videoRef}
                   width={75}
                   height={100}
-                  // autoPlay
                   muted
                   controls
-                  src={row?.videoUrl}
                   onError={() => setVideoError(true)}
                 />
               ) : (
-                <div className="align-items-center border d-flex justify-content-center mx-auto rounded-1" style={{ width: "75px", height: "100px" }}>
-                  <IconVideoOff style={{ width: "50px", height: "50px" }}/>
+                <div
+                  className="align-items-center border d-flex justify-content-center mx-auto rounded-1"
+                  style={{ width: "75px", height: "100px" }}
+                >
+                  <IconVideoOff style={{ width: "50px", height: "50px" }} />
                 </div>
               )}
             </>
           );
         },
       },
+
       // {
       //     Header: "Category",
       //     body: "category",
@@ -315,7 +345,7 @@ const episodeList = () => {
     </>
   );
 };
-export default episodeList;
-episodeList.getLayout = function getLayout(page) {
+export default EpisodeList;
+EpisodeList.getLayout = function getLayout(page) {
   return <RootLayout>{page}</RootLayout>;
 };
