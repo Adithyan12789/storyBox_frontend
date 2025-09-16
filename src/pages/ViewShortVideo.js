@@ -1,26 +1,32 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import RootLayout from '../component/layout/Layout';
-import { useRouter } from 'next/router';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import RootLayout from "../component/layout/Layout";
+import { useRouter } from "next/router";
 import {
   deleteShortVideo,
   getFilmListVideo,
   updateEpisodePosition,
-} from '../store/filmListSlice';
-import Table from '../extra/Table';
-import moment from 'moment';
-import { openDialog } from '../store/dialogueSlice';
-import VideoDialogue from '../component/filmVideo/VideoDialogue';
-import { CiLock, CiUnlock } from 'react-icons/ci';
-import Button from '../extra/Button';
-import TrashIcon from '../assets/icons/trashIcon.svg';
-import EditIcon from '../assets/icons/EditBtn.svg';
-import { warning } from '../util/Alert';
-import EpisodeListDialogue from '../component/episodeList/EpisodeListDialogue';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { getSetting } from '../store/settingSlice';
-import { setToast } from '../util/toastServices';
-import { IconEdit, IconLockFilled, IconLockOpen, IconTrash } from '@tabler/icons-react';
+} from "../store/filmListSlice";
+import Table from "../extra/Table";
+import moment from "moment";
+import { openDialog } from "../store/dialogueSlice";
+import VideoDialogue from "../component/filmVideo/VideoDialogue";
+import { CiLock, CiUnlock } from "react-icons/ci";
+import Button from "../extra/Button";
+import TrashIcon from "../assets/icons/trashIcon.svg";
+import EditIcon from "../assets/icons/EditBtn.svg";
+import { warning } from "../util/Alert";
+import EpisodeListDialogue from "../component/episodeList/EpisodeListDialogue";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import { getSetting } from "../store/settingSlice";
+import { setToast } from "../util/toastServices";
+import {
+  IconEdit,
+  IconLockFilled,
+  IconLockOpen,
+  IconTrash,
+} from "@tabler/icons-react";
+import Hls from "hls.js";
 
 const ViewShortVideo = () => {
   const { dialogueType } = useSelector((state) => state.dialogue);
@@ -34,8 +40,6 @@ const ViewShortVideo = () => {
   const observer = useRef();
 
   const { filmListVideo, totalUser } = useSelector((state) => state.filmsList);
-
-  
 
   const userId = query.movieSeriesId;
 
@@ -68,7 +72,7 @@ const ViewShortVideo = () => {
           movieSeriesId: userId,
         })
       );
-       dispatch(getSetting());
+      dispatch(getSetting());
     }
   }, [userId]);
 
@@ -110,7 +114,6 @@ const ViewShortVideo = () => {
   );
 
   const handleDeleteFilmCategory = (video) => {
-    
     const data = warning();
     data
       .then((res) => {
@@ -141,12 +144,11 @@ const ViewShortVideo = () => {
 
   // Drag and drop functionality
   const handleOnDragEnd = (result) => {
-    
     if (!result.destination) return;
 
     // don't allow first episode
     if (result.source.index === 0 || result.destination.index === 0) {
-      return setToast('error', 'Trailer cannot be moved');
+      return setToast("error", "Trailer cannot be moved");
     }
 
     const sourceIndex = result.source.index;
@@ -196,18 +198,18 @@ const ViewShortVideo = () => {
   const ManageVideoTable = useMemo(
     () => [
       {
-        Header: 'Drag',
-        body: 'drag',
+        Header: "Drag",
+        body: "drag",
         Cell: ({ index }) => (
           <div
             className="drag-handle"
             style={{
-              cursor: 'grab',
-              fontSize: '18px',
-              color: '#666',
-              textAlign: 'center',
-              userSelect: 'none',
-              padding: '5px',
+              cursor: "grab",
+              fontSize: "18px",
+              color: "#666",
+              textAlign: "center",
+              userSelect: "none",
+              padding: "5px",
             }}
           >
             ⋮⋮
@@ -215,24 +217,24 @@ const ViewShortVideo = () => {
         ),
       },
       {
-        Header: 'No',
-        body: 'no',
+        Header: "No",
+        body: "no",
         Cell: ({ index }) => <span className="text-nowrap">{index + 1}</span>,
       },
       {
-        Header: 'Video Image',
-        body: 'image',
+        Header: "Video Image",
+        body: "image",
         Cell: ({ row }) => {
           return (
             <div className="userTableImage">
               <img
-                src={row?.videoImage || '/images/default-movie-poster.jpg'}
+                src={row?.videoImage || "/images/default-movie-poster.jpg"}
                 width={75}
                 height={100}
                 alt="Thumbnail"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/images/default-movie-poster.jpg';
+                  e.target.src = "/images/default-movie-poster.jpg";
                 }}
               />
             </div>
@@ -240,19 +242,47 @@ const ViewShortVideo = () => {
         },
       },
       {
-        Header: 'video',
-        body: 'video',
+        Header: "video",
+        body: "video",
         Cell: ({ row }) => {
           const [videoError, setVideoError] = useState(false);
+          const videoRef = useRef(null);
+
+          useEffect(() => {
+            if (row?.videoUrl && videoRef.current) {
+              let hls;
+
+              // If URL ends with .m3u8 and Hls.js is supported
+              if (row.videoUrl.endsWith(".m3u8") && Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(row.videoUrl);
+                hls.attachMedia(videoRef.current);
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                  console.error("HLS error:", data);
+                  setVideoError(true);
+                });
+              } else {
+                // For MP4 or Safari native HLS support
+                videoRef.current.src = row.videoUrl;
+              }
+
+              // Cleanup on unmount or video change
+              return () => {
+                if (hls) hls.destroy();
+              };
+            }
+          }, [row?.videoUrl]);
+
           return (
             <>
               {!videoError ? (
                 <video
+                  ref={videoRef}
                   width={75}
                   height={100}
                   muted
                   controls
-                  src={row?.videoUrl}
                   onError={() => setVideoError(true)}
                 />
               ) : (
@@ -262,35 +292,36 @@ const ViewShortVideo = () => {
           );
         },
       },
+
       {
-        Header: 'Episode Number',
-        body: 'episode number',
+        Header: "Episode Number",
+        body: "episode number",
         Cell: ({ row, index }) => (
           <div className="userTableImage">
             <span>
-              {row?.episodeNumber === 0 ? 'Trailer' : row?.episodeNumber}
+              {row?.episodeNumber === 0 ? "Trailer" : row?.episodeNumber}
             </span>
           </div>
         ),
       },
       {
-        Header: 'Locked Status',
-        body: 'episode number',
+        Header: "Locked Status",
+        body: "episode number",
         Cell: ({ row }) => (
           <div className="userTableImage">
             <span>
               {row?.isLocked ? (
-                <IconLockFilled className='text-danger' />
+                <IconLockFilled className="text-danger" />
               ) : (
-                <IconLockOpen className='text-success' />
+                <IconLockOpen className="text-success" />
               )}
             </span>
           </div>
         ),
       },
       {
-        Header: 'Coins',
-        body: 'coins',
+        Header: "Coins",
+        body: "coins",
         Cell: ({ row }) => (
           <div className="userTableImage">
             <span>{row?.coin || 0}</span>
@@ -298,37 +329,32 @@ const ViewShortVideo = () => {
         ),
       },
       {
-        Header: 'Date',
-        body: 'date',
+        Header: "Date",
+        body: "date",
         Cell: ({ row }) => (
           <span className="text-capitalize cursorPointer">
-            {moment(row?.releaseDate).format('DD/MM/YYYY') || '-'}
+            {moment(row?.releaseDate).format("DD/MM/YYYY") || "-"}
           </span>
         ),
       },
       {
-        Header: 'Action',
-        body: 'action',
+        Header: "Action",
+        body: "action",
         Cell: ({ row }) => (
           <div className="action-button">
             <Button
-              btnIcon={
-                <IconEdit className='text-secondary' />
-              }
-                  onClick={() => {
-                    
-                    dispatch(
-                      openDialog({
-                        type: 'episodeList',
-                        data: row,
-                      })
-                    );
-                  }}
+              btnIcon={<IconEdit className="text-secondary" />}
+              onClick={() => {
+                dispatch(
+                  openDialog({
+                    type: "episodeList",
+                    data: row,
+                  })
+                );
+              }}
             />
             <Button
-              btnIcon={
-                <IconTrash className='text-secondary' />
-              }
+              btnIcon={<IconTrash className="text-secondary" />}
               onClick={() => handleDeleteFilmCategory(row)}
             />
           </div>
@@ -340,27 +366,27 @@ const ViewShortVideo = () => {
 
   return (
     <>
-      {dialogueType == 'viewVideo' && <VideoDialogue />}
-      {dialogueType == 'episodeList' && (
+      {dialogueType == "viewVideo" && <VideoDialogue />}
+      {dialogueType == "episodeList" && (
         <EpisodeListDialogue page={page} size={size} />
       )}
-      
-      <div className='userPage'>
+
+      <div className="userPage">
         <div className="user-table real-user mb-3">
           <div className="user-table-top">
             <h5
               style={{
-                fontWeight: '500',
-                fontSize: '20px',
-                marginBottom: '5px',
-                marginTop: '5px',
+                fontWeight: "500",
+                fontSize: "20px",
+                marginBottom: "5px",
+                marginTop: "5px",
               }}
             >
               Short Videos - Drag & Drop to Reorder
             </h5>
             <small className="text-muted">
-              Total Episodes: {data.length}{' '}
-              {hasMore ? '(Loading more...)' : '(All loaded)'}
+              Total Episodes: {data.length}{" "}
+              {hasMore ? "(Loading more...)" : "(All loaded)"}
             </small>
           </div>
 
@@ -371,7 +397,7 @@ const ViewShortVideo = () => {
                   <Table
                     data={data}
                     mapData={ManageVideoTable}
-                    type={'client'}
+                    type={"client"}
                     isDraggable={true}
                     lastElementRef={lastVideoElementRef}
                   />
